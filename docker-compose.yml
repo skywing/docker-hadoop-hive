@@ -1,0 +1,104 @@
+version: "3.7"
+
+services:
+  namenode:
+    image: hadoop-namenode:latest
+    container_name: namenode
+    hostname: namenode
+    environment:
+      - CLUSTER_NAME=hadoop-hive-3.2.2
+    env_file:
+      - core.env
+      - yarn-remote.env
+    ports:
+      - "50070:50070"
+
+  datanode:
+    image: hadoop-datanode:latest
+    container_name: datanode
+    hostname: datanode
+    environment:
+      - SERVICE_PRECONDITION=namenode:50070
+    env_file:
+      - core.env
+      - yarn-remote.env
+    ports:
+      - "50075:50075"
+
+  resourcemanager:
+    image: hadoop-resourcemanager:latest
+    container_name: resourcemanager
+    hostname: resourcemanager
+    environment:
+      - SERVICE_PRECONDITION=namenode:50070 datanode:50075
+    env_file:
+      - core.env
+      - yarn-resource-manager.env
+    ports:
+      - "8088:8088"
+
+  nodemanager:
+    image: hadoop-nodemanager:latest
+    container_name: nodemanager
+    hostname: nodemanager
+    environment:
+      - SERVICE_PRECONDITION=namenode:50070 datanode:50075 resourcemanager:8088
+    env_file:
+      - core.env
+      - yarn-node-manager.env
+    ports:
+      - "8042:8042"
+
+  hs2:
+    image: hadoop-hiveserver:latest
+    container_name: hs2
+    hostname: hs2
+    environment:
+      - SERVICE_PRECONDITION=metastore:9083
+    env_file:
+      - core.env
+      - yarn-remote.env
+      - hive.env
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+
+  metastore:
+    image: hadoop-hive-metastore:latest
+    container_name: metastore
+    hostname: metastore
+    environment:
+      - SERVICE_PRECONDITION=namenode:50070 datanode:50075 metastore-db:5432
+    env_file:
+      - core.env
+      - yarn-remote.env
+      - hive.env
+      - metastore.env
+
+  metastore-db:
+    image: hadoop-hive-metastore-db:latest
+    container_name: metastore-db
+    hostname: metastore-db
+    environment:
+      POSTGRESQL_ADMIN_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+   # historyserver:
+  #   image: hadoop-historyserver:latest
+  #   container_name: historyserver
+  #   hostname: historyserver
+  #   environment:
+  #     - SERVICE_PRECONDITION=namenode:9870 datanode:9864 resourcemanager:8088
+  #   env_file:
+  #     - core.env
+  #     - yarn-timeline.env
+  #   ports:
+  #     - "8188:8188"
+
+  # edgenode:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.edgenode
+  #   container_name: edgenode
+  #   hostname: edgenode

@@ -1,0 +1,32 @@
+
+FROM hadoop-base:latest as tez-builder
+
+LABEL platform="dev-hadoop-hivetez"
+
+ARG TEZ_VERSION=0.9.2
+ARG HADOOP_VERSION=2.10.1
+ARG PROTOBUF_VERSION=2.5.0
+
+RUN yum install -y autoconf automake libtool make unzip maven
+RUN yum groupinstall -y "Development Tools"
+
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_VERSION}/protobuf-${PROTOBUF_VERSION}.tar.gz -O ./protobuf-${PROTOBUF_VERSION}.tar.gz
+
+RUN tar -xvf protobuf-${PROTOBUF_VERSION}.tar.gz \
+    && cd protobuf-${PROTOBUF_VERSION} \
+    && ./configure --prefix=/usr \
+    && make \
+    && make check \
+    && make install \
+    && ldconfig
+
+
+RUN wget https://dlcdn.apache.org/tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-src.tar.gz -O /opt/apache-tez-${TEZ_VERSION}-src.tar.gz
+RUN tar -xvf /opt/apache-tez-${TEZ_VERSION}-src.tar.gz -C /opt \
+    && mv /opt/apache-tez-${TEZ_VERSION}-src /opt/tez
+RUN cd /opt/tez \
+    && mvn clean package -Phadoop28 -Dhadoop.version=${HADOOP_VERSION} -Dprotobuf.version=${PROTOBUF_VERSION} -DskipTests=true -Dmaven.javadoc.skip=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true  --projects "!tez-ui" \
+    && mkdir -pv /tmp/tez \
+    && tar -xvf /opt/tez/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz -C /tmp/tez \
+    && cp /opt/tez/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz /tmp/tez/tez-${TEZ_VERSION}-minimal.tar.gz

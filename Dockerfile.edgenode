@@ -1,0 +1,14 @@
+FROM hadoop-edgenode:latest
+
+LABEL dc-image="dev-edgenode"
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip3 install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir -r requirements.txt
+
+# Expose debugpy port
+EXPOSE 5678
+
+# command to run on container start. Pause execution
+CMD ["python", "-c", "while 1: import ctypes; ctypes.CDLL(None).pause()"]

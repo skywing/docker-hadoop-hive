@@ -1,0 +1,10 @@
+pytest
+sqlalchemy
+psycopg2-binary
+hdfs
+impyla
+jaydebeapi
+hdfs
+debugpy
+pyhive
+boto3
