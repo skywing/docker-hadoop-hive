@@ -5,8 +5,8 @@
 This image does the following:
 * update image timezone to `America/New_York`
 * run `yum install -y` update and install the following required packages:
-    * `java-1.8.0-openjdk.x86_64`
-    * `java-1.8.0-openjdk-devel.x86_64`
+    * `java-1.8.0-openjdk`
+    * `java-1.8.0-openjdk-devel`
     * `perl`
     * `nc`
 * add `entrypoint.sh`

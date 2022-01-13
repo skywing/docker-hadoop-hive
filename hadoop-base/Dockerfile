@@ -6,8 +6,8 @@ ARG TIMEZONE=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
 
 RUN yum update -y
-RUN yum install -y java-1.8.0-openjdk.x86_64
-RUN yum install -y java-1.8.0-openjdk-devel.x86_64
+RUN yum install -y java-1.8.0-openjdk
+RUN yum install -y java-1.8.0-openjdk-devel
 RUN yum install -y nc
 RUN yum install -y perl
 RUN yum install -y wget
